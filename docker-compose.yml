@@ -168,7 +168,7 @@ services:
       timeout: 10s
       retries: 4
     volumes:
-      - ./imports:/etc/keys
+      - ./voluntable-registry/imports:/etc/keys
 
 
   file-storage:
