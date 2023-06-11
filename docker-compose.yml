@@ -149,7 +149,7 @@ services:
     image: dockerhub/sunbird-rc-certificate-api
     volumes:
       - ./voluntable-registry/scripts:/scripts
-    entrypoint: ["sh", "/voluntable-registry/scripts/docker-entrypoint.sh"]
+    entrypoint: ["sh", "/scripts/docker-entrypoint.sh"]
     environment:
       - PORT=8078
     ports:
