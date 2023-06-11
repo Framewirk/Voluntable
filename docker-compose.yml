@@ -1,0 +1,189 @@
+version: '3.1'
+
+services:
+  mongo:
+    image: mongo
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    command: mongod --quiet --logpath /var/log/mongodb/mongod.log 
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+
+  voluntable-backend:
+    image: voluntable-backend:1
+    build:
+      context: ./voluntable-backend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 5000:5000
+    environment:
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - MONGO_CONN=${MONGO_CONN}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - VAPID_PUB_KEY=${VAPID_PUB_KEY}
+      - VAPID_PRIV_KEY=${VAPID_PRIV_KEY}
+      - WEB_PUSH_CONTACT=${WEB_PUSH_CONTACT}
+
+  voluntable-frontend-public:
+    image: voluntable-frontend-public:1
+    build:
+      context: ./voluntable-frontend-public
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 3000:80
+
+  voluntable-frontend-admin:
+    image: voluntable-frontend-admin:1
+    build:
+      context: ./voluntable-frontend-admin
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 3001:80
+
+  voluntable-verification-service:
+    image: voluntable-verification-service:1
+    build:
+      context: ./voluntable-verification-service
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 3002:80
+
+
+  voluntable-redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+
+  voluntable-elastic-storage:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "localhost:9200/_cluster/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 4
+
+
+  voluntable-certificate-db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_HOSTNAME=${POSTGRES_HOSTNAME}
+      - POSTGRES_DB=${POSTGRES_DATABASE}
+      - POSTGRES_USER=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+
+  registry:
+    image: dockerhub/sunbird-rc-core
+    volumes:
+      - ./voluntable-registry/schemas:/home/sunbirdrc/config/public/_schemas
+
+    environment:
+      # Authentication
+      - authentication_enabled=false
+      # Database (Postgres)
+      - connectionInfo_uri=jdbc:postgresql://${POSTGRES_HOSTNAME}:5432/${POSTGRES_DATABASE}
+      - connectionInfo_username=${POSTGRES_USERNAME}
+      - connectionInfo_password=${POSTGRES_PASSWORD}
+      # Elastic
+      - elastic_search_connection_url=voluntable-elastic-storage:9200
+      - search_provider=dev.sunbirdrc.registry.service.ElasticSearchService
+      # File storage (minio)
+      - filestorage_connection_url=http://file-storage:9000
+      - filestorage_access_key=${MINIO_ROOT_USER}
+      - filestorage_secret_key=${MINIO_ROOT_PASSWORD}
+      - filestorage_bucket_key=issuance
+      ## Services
+      ### Certificate Signer
+      - sign_url=http://certificate-signer:8079/sign
+      - signature_enabled=true
+      ### Certificate Generator
+      - pdf_url=http://certificate-api:8078/api/v1/certificatePDF
+      - template_base_url=http://registry:8081/api/v1/templates/ #Looks for certificate templates for pdf copy of the signed certificate
+      ### Claims (?)
+      - claims_url=http://claim-ms:8082
+      ## Use the following if authentication is enabled
+      ## In that case, configure an instance of keycloak.
+      ## (https://docs.sunbirdrc.dev/developer-setup#configuring-the-registry)
+      # - sunbird_sso_realm=sunbird-rc
+      # - sunbird_sso_url=http://keycloak:8080/auth
+      # - sunbird_sso_admin_client_id=admin-api
+      # - sunbird_sso_client_id=registry-frontend
+      # - sunbird_sso_admin_client_secret=3a9f3252-36ee-47e0-bbdb-ad2958d7d416
+    ports:
+      - "8081:8081"
+    depends_on:
+      voluntable-elastic-storage:
+        condition: service_healthy
+      voluntable-certificate-db:
+        condition: service_started
+
+
+  certificate-signer:
+    image: dockerhub/sunbird-rc-certificate-signer
+    environment:
+      - PORT=8079
+      - CONFIG_BASE_PATH=/etc/signer/
+    ports:
+      - "8079:8079"
+    volumes:
+      - ./voluntable-registry/imports:/etc/signer
+
+
+  certificate-api:
+    image: dockerhub/sunbird-rc-certificate-api
+    volumes:
+      - ./voluntable-registry/scripts:/scripts
+    entrypoint: ["sh", "/voluntable-registry/scripts/docker-entrypoint.sh"]
+    environment:
+      - PORT=8078
+    ports:
+      - "8078:8078"
+
+
+  public-key-service:
+    image: dockerhub/sunbird-rc-public-key-service
+    environment:
+      - CONFIG_BASE_PATH=/etc/keys
+    ports:
+      - "3300:3300"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "localhost:3300/api/v1/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 4
+    volumes:
+      - ./imports:/etc/keys
+
+
+  file-storage:
+    image: quay.io/minio/minio
+    volumes:
+      - ${HOME}/minio/data:/data
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    command: server --address 0.0.0.0:9000 --console-address 0.0.0.0:9001 /data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3

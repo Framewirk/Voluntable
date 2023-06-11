@@ -1,0 +1,4 @@
+# REACT_APP_BACKEND_API=https://api.onedelhi.voluntable.com
+REACT_APP_BACKEND_API=http://localhost:5000
+REACT_APP_GCLIENT_ID=1000000000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com
+REACT_APP_VAPID_PUBLIC_KEY=BKdowsxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxyiBr3qTQE

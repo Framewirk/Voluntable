@@ -1,0 +1,67 @@
+<html lang="en">
+
+<head>
+    <style>
+        .line {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body style="width: 900px; background-color: #F4F0E8">
+    <div style="
+        margin: 1em;
+        /* border: 3px solid darkgoldenrod; */
+        padding: 2rem;
+        border-radius: 5px;
+        height: 90vh;
+      ">
+        <div style="
+          padding: 1em;
+          text-align: center;
+          font-family: Canterbury;
+          font-size: 4em;
+        ">
+            Completion Certificate
+        </div>
+        <div class="line">
+            <p>
+                This is to certify that <br />
+                <b>{{credentialSubject.name}}</b> (<a
+                    href="mailto:{{credentialSubject.email}}">{{credentialSubject.email}}</a>) <br />
+                has successfully completed the task <br />
+                <b><q>{{credentialSubject.certified.taskTitle}}.</q></b><br />
+                on {{dateFormat proof.created "dddd, MMMM Do YYYY"}}
+            </p>
+        </div>
+        <div valign="bottom">
+            <img style="display: block; margin: 10 auto; padding: 2rem" src="{{qrCode}}" alt="qr_code" />
+        </div>
+        <div>
+            <table>
+                <tr>
+                    <td><b>Description: </b></td>
+                    <td>{{credentialSubject.certified.description}}</td>
+                </tr>
+                <tr>
+                    <td><b>Task Duration: </b></td>
+                    <td>{{credentialSubject.certified.taskDuration}}</td>
+                </tr>
+                <tr>
+                    <td><b>Task Start Date: </b></td>
+                    <td>
+                        {{dateFormat credentialSubject.certified.taskStartDate "dddd, MMMM Do YYYY"}} </td>
+                </tr>
+                <tr>
+                    <td><b>Certificate Author: </b></td>
+                    <td>{{credentialSubject.certified.authorizedBy}}</td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            <p>CERTIFIED ISSUED BY ONEDELHI <br />{{ issuer }}</p>
+        </div>
+    </div>
+</body>
+
+</html>

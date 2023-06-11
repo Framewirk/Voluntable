@@ -1,0 +1,131 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "properties": {
+    "CompletionCertificate": {
+      "$ref": "#/definitions/CompletionCertificate"
+    }
+  },
+  "required": ["CompletionCertificate"],
+  "title": "CompletionCertificate",
+  "definitions": {
+    "CompletionCertificate": {
+      "$id": "#/properties/CompletionCertificate",
+      "type": "object",
+      "title": "The CompletionCertificate Schema",
+      "required": ["volunteerEmail", "taskTitle"],
+      "properties": {
+        "certificateAuthor": {
+          "type": "string"
+        },
+        "volunteerName": {
+          "type": "string"
+        },
+        "volunteerEmail": {
+          "type": "string"
+        },
+        "taskTitle": {
+          "type": "string"
+        },
+        "taskDescription": {
+          "type": "string"
+        },
+        "taskStartDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "taskDuration": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "_osConfig": {
+    "uniqueIndexFields": ["contact"],
+    "ownershipAttributes": [],
+    "roles": [],
+    "inviteRoles": ["anonymous"],
+    "enableLogin": false,
+    "credentialTemplate": {
+      "@context": [
+        "https://www.w3.org/2018/credentials/v1",
+        {
+          "@context": {
+            "Person": "http://schema.org/Person",
+            "name": "http://schema.org/name",
+            "email": {
+              "@id": "http://schema.org/email",
+              "@type": "@id"
+            },
+            "gender": "http://schema.org/gender",
+            "honorificPrefix": "http://schema.org/honorificPrefix",
+            "sibling": {
+              "@id": "http://schema.org/sibling",
+              "@type": "@id"
+            },
+            "telephone": "http://schema.org/telephone",
+            "certified": "schema:Certificate"
+          }
+        },
+        {
+          "@context": {
+            "@version": 1.1,
+            "@protected": true,
+            "certificateTitle": {
+              "@id": "http://github.com/sunbird-spec/vc-specs#title",
+              "@context": {
+                "name": "schema:Text"
+              }
+            },
+            "authorizedBy": {
+              "@id": "http://github.com/sunbird-spec/vc-specs#authorizedBy",
+              "@context": {
+                "name": "schema:Text"
+              }
+            },
+            "taskTitle": {
+              "@id": "http://github.com/sunbird-spec/vc-specs#taskTitle",
+              "@context": {
+                "name": "schema:Text"
+              }
+            },
+            "description": {
+              "@id": "http://github.com/sunbird-spec/vc-specs#description",
+              "@context": {
+                "name": "schema:Text"
+              }
+            },
+            "taskDuration": {
+              "@id": "http://github.com/sunbird-spec/vc-specs#taskDuration",
+              "@context": {
+                "name": "schema:Text"
+              }
+            },
+            "taskStartDate": {
+              "@id": "http://github.com/sunbird-spec/vc-specs#taskStartDate",
+              "@context": {
+                "name": "schema:date"
+              }
+            }
+          }
+        }
+      ],
+      "type": ["VerifiableCredential", "VolunteerCertificate"],
+      "issuanceDate": "2022-09-11T00:00:00.007Z",
+      "credentialSubject": {
+        "id": "did:email:{{volunteerEmail}}",
+        "name": "{{volunteerName}}",
+        "email": "{{volunteerEmail}}",
+        "certified": {
+          "certificateTitle": "CompletionCertificate",
+          "authorizedBy": "{{certificateAuthor}}",
+          "taskTitle": "{{taskTitle}}",
+          "description": "{{taskDescription}}",
+          "taskDuration": "{{taskDuration}}",
+          "taskStartDate": "{{taskStartDate}}"
+        }
+      },
+      "issuer": "did:web:onedelhi.voluntable.in"
+    }
+  }
+}

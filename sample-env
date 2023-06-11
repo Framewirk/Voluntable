@@ -1,0 +1,20 @@
+# mongodb
+MONGO_INITDB_ROOT_USERNAME=username
+MONGO_INITDB_ROOT_PASSWORD=password
+MONGO_INITDB_DATABASE=voluntable
+
+# backend
+ACCESS_TOKEN_SECRET=c0d7b5aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafc6a9a
+MONGO_CONN=mongodb://voluntable:password@mongo:27017/
+GOOGLE_CLIENT_ID=1000000000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com
+VAPID_PUB_KEY=BKdowsxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxyiBr3qTQE
+VAPID_PRIV_KEY=dVXWLxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXSHzdk
+WEB_PUSH_CONTACT=mailto:support@voluntable.com
+
+# sunbird
+POSTGRES_HOSTNAME=voluntabledb
+POSTGRES_DATABASE=postgres
+POSTGRES_USERNAME=username
+POSTGRES_PASSWORD=password
+MINIO_ROOT_USER=admin
+MINIO_ROOT_PASSWORD=password
